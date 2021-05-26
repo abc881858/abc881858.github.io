@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  <entry>
+    <title>CMake Qt</title>
+    <url>/cmake-qt.html</url>
+    <content><![CDATA[<h1 id="CMake-Qt"><a href="#CMake-Qt" class="headerlink" title="CMake Qt"></a>CMake Qt</h1><h2 id="CMake-和-QMake"><a href="#CMake-和-QMake" class="headerlink" title="CMake 和 QMake"></a>CMake 和 QMake</h2><p>先看下 CMake 的 Qt 示例吧</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">cmake_minimum_required</span>(VERSION <span class="number">3.5</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">project</span>(helloworld LANGUAGES CXX)</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>(CMAKE_INCLUDE_CURRENT_DIR <span class="keyword">ON</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>(CMAKE_AUTOUIC <span class="keyword">ON</span>)</span><br><span class="line"><span class="keyword">set</span>(CMAKE_AUTOMOC <span class="keyword">ON</span>)</span><br><span class="line"><span class="keyword">set</span>(CMAKE_AUTORCC <span class="keyword">ON</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_STANDARD <span class="number">11</span>)</span><br><span class="line"><span class="keyword">set</span>(CMAKE_CXX_STANDARD_REQUIRED <span class="keyword">ON</span>)</span><br><span class="line"></span><br><span class="line"><span class="keyword">find_package</span>(Qt5 COMPONENTS Widgets REQUIRED)</span><br><span class="line"></span><br><span class="line"><span class="keyword">add_executable</span>(helloworld</span><br><span class="line">    main.cpp</span><br><span class="line">    mainwindow.cpp</span><br><span class="line">    mainwindow.h</span><br><span class="line">    mainwindow.ui</span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="keyword">target_link_libraries</span>(helloworld PRIVATE Qt5::Widgets)</span><br></pre></td></tr></table></figure>
+
+<p>然后是 QMake 的 Qt 示例</p>
+<figure class="highlight cpp"><table><tr><td class="code"><pre><span class="line">QT += core gui widgets</span><br><span class="line"></span><br><span class="line">CONFIG += c++<span class="number">11</span></span><br><span class="line"></span><br><span class="line">SOURCES += \</span><br><span class="line">    main.cpp \</span><br><span class="line">    mainwindow.cpp</span><br><span class="line"></span><br><span class="line">HEADERS += mainwindow.h</span><br><span class="line"></span><br><span class="line">FORMS += mainwindow.ui</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="qmake-转-cmake"><a href="#qmake-转-cmake" class="headerlink" title="qmake 转 cmake"></a>qmake 转 cmake</h2><p>qmake 转 cmake 需要我们手动创建一个 CMakeLists.txt</p>
+<p>BTW，我的开发环境是 win10 + Qt5.14.2 + VS2015 + 64bit</p>
+<p><strong>① 引入Qt库</strong></p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">find_package</span>(Qt5 COMPONENTS Core Gui Qml Widgets LinguistTools WebView REQUIRED)</span><br></pre></td></tr></table></figure>
+
+<p>注意：只添加你需要的库就好，你也可以分成多行</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">find_package</span>(Qt5Core REQUIRED)</span><br><span class="line"><span class="keyword">find_package</span>(Qt5Network REQUIRED)</span><br></pre></td></tr></table></figure>
+
+<p><strong>② 添加头文件和源文件</strong></p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span>(SOURCE_FILES mainwindow.cpp main.cpp)</span><br><span class="line"><span class="keyword">set</span>(HEADER_FILES mainwindow.h)</span><br><span class="line"><span class="keyword">set</span>(UI_FILES mainWindow.ui)</span><br><span class="line"><span class="keyword">set</span>(RESOURCE_FILES resource.qrc)</span><br><span class="line"><span class="keyword">set</span>(EXTRA_RESOURCES app.rc )</span><br><span class="line"><span class="keyword">add_executable</span>(<span class="keyword">test</span></span><br><span class="line">    <span class="variable">$&#123;SOURCE_FILES&#125;</span></span><br><span class="line">    <span class="variable">$&#123;HEADER_FILES&#125;</span></span><br><span class="line">    <span class="variable">$&#123;UI_FILES&#125;</span></span><br><span class="line">    <span class="variable">$&#123;RESOURCE_FILES&#125;</span></span><br><span class="line">    <span class="variable">$&#123;EXTRA_RESOURCES&#125;</span></span><br><span class="line">)</span><br></pre></td></tr></table></figure>
+
+<p>注意：头文件不一定要写在 SOURCE_FILES，可以 include_directories (.) 引入</p>
+<p><strong>③ 添加库</strong></p>
+<p>比如要添加 qml、widgets、opencv 的库</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">target_link_libraries</span>(helloworld Qt5::Qml Qt5::Widgets <span class="variable">$&#123;OpenCV_LIBS&#125;</span>)</span><br></pre></td></tr></table></figure>
+
+<p><strong>④ 其他</strong></p>
+<p>如果你 CMakeLists.txt 同级目录下有一个 src，我们可以加上</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">add_subdirectory</span>(src)</span><br></pre></td></tr></table></figure>
+
+<p>然后在 src 里再创建一个 CMakeLists.txt，实现<strong>分层结构</strong></p>
+<p>如果要用 C++17，我们可以加上</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span>(CMAKE_CXX_STANDARD <span class="number">17</span>)</span><br></pre></td></tr></table></figure>
+
+<p>如果用了 uic，moc，rcc，我们可以加上</p>
+<figure class="highlight cmake"><table><tr><td class="code"><pre><span class="line"><span class="keyword">set</span>(CMAKE_AUTOUIC <span class="keyword">ON</span>)</span><br><span class="line"><span class="keyword">set</span>(CMAKE_AUTOMOC <span class="keyword">ON</span>)</span><br><span class="line"><span class="keyword">set</span>(CMAKE_AUTORCC <span class="keyword">ON</span>)</span><br></pre></td></tr></table></figure>
+
+<hr>
+<h2 id="cmake-转-qmake"><a href="#cmake-转-qmake" class="headerlink" title="cmake 转 qmake"></a>cmake 转 qmake</h2><p>cmd 进入 CMakeLists.txt 同级目录下</p>
+<figure class="highlight ada"><table><tr><td class="code"><pre><span class="line">qmake -project</span><br></pre></td></tr></table></figure>
+
+<p>会生成 .pro 文件</p>
+<p>但需要手动移除掉无关的文件，加上 <strong>QT += widgets</strong></p>
+<figure class="highlight ada"><table><tr><td class="code"><pre><span class="line">//Qt 工程转 VS 工程</span><br><span class="line">cmd 进入 Qt 工程的 pro 文件夹下</span><br><span class="line">qmake -tp vc xxx.pro</span><br><span class="line">会生成文件 xxx.vcxproj</span><br></pre></td></tr></table></figure>
+
+<hr>
+<p><strong>cmake 和 Qt Creator</strong></p>
+<p>首先，我们用管理员权限打开 Qt Creator，打开 工具-&gt;选项</p>
+<p><img src="https://pic4.zhimg.com/80/v2-b4df7946def94f5d44f02a38ec9eea23_720w.jpg" alt="img"></p>
+<p>cmake 是从 <a href="https://link.zhihu.com/?target=https://cmake.org/">官网</a> 下载的，配置下路径，然后选择上图的 manager，</p>
+<p>设置 Generator 后，手动删除下图的 Platform 和 Toolset 原来的内容，<strong>留空</strong>，OK 退出</p>
+<p><img src="https://pic3.zhimg.com/80/v2-d929fc0deb58a19d22eba1112fbab022_720w.jpg" alt="img"></p>
+<p>这时我们编译运行的话，会报错</p>
+<figure class="highlight ada"><table><tr><td class="code"><pre><span class="line">MSBUILD:-<span class="number">1</span>: error: MSB1009: 项目文件不存在。</span><br></pre></td></tr></table></figure>
+
+<p>如下图这么解决</p>
+<p><img src="https://pic3.zhimg.com/80/v2-d65b939a4e050db08a4a06dcf6766162_720w.jpg" alt="img"></p>
+]]></content>
+      <categories>
+        <category>Qt</category>
+      </categories>
+      <tags>
+        <tag>Qt</tag>
+      </tags>
+  </entry>
+</search>
